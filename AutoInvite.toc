@@ -1,0 +1,7 @@
+## Interface: 30300
+## Title: AutoInvite
+## Notes: Auto invite on whisper keyword, raid kick buttons, auto-promote assistants.
+## Author: Weird Vibes
+## Version: 0.8-wotlk
+## SavedVariables: AutoInviteOptions, AutoPromoteDB
+AutoInvite.lua
