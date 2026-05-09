@@ -146,59 +146,35 @@ local function Promote()
 	end
 end
 
--- Add menu entry "AutoPromote" to right-click on raid members.
-UnitPopupButtons["RAID_AUTOPROMOTE"] = { text = "AutoPromote", dist = 0, checkable = 1 }
-do
-	local raid = UnitPopupMenus["RAID"]
-	if raid then
-		local has = false
-		for _, v in ipairs(raid) do if v == "RAID_AUTOPROMOTE" then has = true; break end end
-		if not has then
-			-- Insert before CANCEL if present, else append.
-			local idx
-			for i, v in ipairs(raid) do if v == "CANCEL" then idx = i; break end end
-			if idx then table.insert(raid, idx, "RAID_AUTOPROMOTE") else table.insert(raid, "RAID_AUTOPROMOTE") end
-		end
+-- Append "AutoPromote" to the right-click raid menu without mutating
+-- UnitPopupMenus / UnitPopupButtons. Modifying those tables taints the
+-- whole RAID popup and breaks protected actions like Set Main Tank
+-- (SetPartyAssignment). Adding the button via UIDropDownMenu_AddButton
+-- inside a secure post-hook keeps Blizzard's entries clean and only our
+-- own entry carries our taint.
+local function TogglePromote(target)
+	local lname = string.lower(target)
+	if AutoPromoteDB.watch_names[lname] then
+		AutoPromoteDB.watch_names[lname] = nil
+		aprint("AutoPromote: removed "..target)
+		if IsRaidLeader() then DemoteAssistant(target) end
+	else
+		AutoPromoteDB.watch_names[lname] = true
+		aprint("AutoPromote: added "..target)
+		if IsRaidLeader() then PromoteToAssistant(target) end
 	end
 end
 
-hooksecurefunc("UnitPopup_OnClick", function(self)
-	if self.value ~= "RAID_AUTOPROMOTE" then return end
-	local dropdownFrame = UIDROPDOWNMENU_INIT_MENU
-	local name = dropdownFrame and dropdownFrame.name
-	if not name then return end
-	local lname = string.lower(name)
-	if AutoPromoteDB.watch_names[lname] then
-		AutoPromoteDB.watch_names[lname] = nil
-		aprint("AutoPromote: removed "..name)
-		if IsRaidLeader() then DemoteAssistant(name) end
-	else
-		AutoPromoteDB.watch_names[lname] = true
-		aprint("AutoPromote: added "..name)
-		if IsRaidLeader() then PromoteToAssistant(name) end
-	end
-end)
-
--- Set the checkbox texture on our entry so toggle state is visible.
--- UnitPopup_ShowMenu builds the menu via UIDropDownMenu_AddButton; after it
--- returns, walk DropDownList<level>Button<i> and toggle the Check texture
--- on the button whose value is RAID_AUTOPROMOTE.
 hooksecurefunc("UnitPopup_ShowMenu", function(dropdownMenu, which, unit, popupName)
 	if which ~= "RAID" then return end
 	local target = popupName or (unit and UnitName(unit))
 	if not target then return end
-	local checked = AutoPromoteDB.watch_names[string.lower(target)] and true or false
-	local level = UIDROPDOWNMENU_MENU_LEVEL or 1
-	for i = 1, (UIDROPDOWNMENU_MAXBUTTONS or 30) do
-		local btn = _G["DropDownList"..level.."Button"..i]
-		if btn and btn.value == "RAID_AUTOPROMOTE" then
-			local check = _G[btn:GetName().."Check"]
-			if check then
-				if checked then check:Show() else check:Hide() end
-			end
-			return
-		end
-	end
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = "AutoPromote"
+	info.checked = AutoPromoteDB.watch_names[string.lower(target)] and true or false
+	info.func = function() TogglePromote(target) end
+	info.notCheckable = nil
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL or 1)
 end)
 
 ----------------------------------------------------------------------
