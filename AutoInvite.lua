@@ -257,7 +257,6 @@ end
 
 local rcount = 0
 local f = CreateFrame("Frame", "AutoInviteFrame")
-f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("PLAYER_LOGIN")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:RegisterEvent("RAID_ROSTER_UPDATE")
@@ -265,16 +264,14 @@ f:RegisterEvent("CHAT_MSG_WHISPER")
 f:RegisterEvent("CHAT_MSG_GUILD")
 
 f:SetScript("OnEvent", function(self, event, ...)
-	if event == "ADDON_LOADED" then
-		local who = ...
-		if who == ADDON then
-			InitAutoInvite()
-			InitAutoPromote()
-			aprint("AutoInvite v"..VERSION.." loaded. /ai for help.")
-			CreateKickButtons()
-			self:UnregisterEvent("ADDON_LOADED")
-		end
-	elseif event == "PLAYER_LOGIN" or event == "PLAYER_ENTERING_WORLD" then
+	if event == "PLAYER_LOGIN" then
+		InitAutoInvite()
+		InitAutoPromote()
+		aprint("AutoInvite v"..VERSION.." loaded. /ai for help.")
+		CreateKickButtons()
+		rcount = GetNumRaidMembers()
+		Promote()
+	elseif event == "PLAYER_ENTERING_WORLD" then
 		CreateKickButtons()
 		rcount = GetNumRaidMembers()
 		Promote()
