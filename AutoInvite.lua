@@ -146,13 +146,12 @@ local function Promote()
 	end
 end
 
--- Append "AutoPromote" to the right-click raid menu without mutating
--- UnitPopupMenus / UnitPopupButtons. Modifying those tables taints the
--- whole RAID popup and breaks protected actions like Set Main Tank
--- (SetPartyAssignment). Adding the button via UIDropDownMenu_AddButton
--- inside a secure post-hook keeps Blizzard's entries clean and only our
--- own entry carries our taint.
-local function TogglePromote(target)
+-- The AutoPromote toggle is exposed as a global so RaidMenu.lua's secure
+-- replacement menu can call it. It is deliberately NOT added to Blizzard's
+-- right-click menu: writing into the shared DropDownList frame taints it and
+-- blocks the protected Set Main Tank / Set Main Assist actions. RaidMenu.lua
+-- owns a private secure menu instead.
+function AutoInvite_TogglePromote(target)
 	local lname = string.lower(target)
 	if AutoPromoteDB.watch_names[lname] then
 		AutoPromoteDB.watch_names[lname] = nil
@@ -165,17 +164,9 @@ local function TogglePromote(target)
 	end
 end
 
-hooksecurefunc("UnitPopup_ShowMenu", function(dropdownMenu, which, unit, popupName)
-	if which ~= "RAID" then return end
-	local target = popupName or (unit and UnitName(unit))
-	if not target then return end
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = "AutoPromote"
-	info.checked = AutoPromoteDB.watch_names[string.lower(target)] and true or false
-	info.func = function() TogglePromote(target) end
-	info.notCheckable = nil
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL or 1)
-end)
+function AutoInvite_IsPromoteWatched(target)
+	return AutoPromoteDB.watch_names[string.lower(target)] and true or false
+end
 
 ----------------------------------------------------------------------
 -- Raid kick buttons (added to Raid tab)

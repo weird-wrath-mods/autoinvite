@@ -5,3 +5,4 @@
 ## Version: 0.8-wotlk
 ## SavedVariables: AutoInviteOptions, AutoPromoteDB
 AutoInvite.lua
+RaidMenu.lua
