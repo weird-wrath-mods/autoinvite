@@ -127,15 +127,19 @@ local function BuildMenu()
 			if def.action then row:SetAttribute("action", def.action) end
 		else
 			row = CreateFrame("Button", "AIRaidMenuRow"..i, menu)
-			if def.run then
-				local run = def.run
-				row:SetScript("OnClick", function()
-					local unit = menu:GetAttribute("unit")
-					local name = unit and UnitName(unit)
-					if name then run(name) end
-					menu:UpdateChecks()
-				end)
-			end
+			-- Plain rows are not explicitly protected, so the secure OnClick wrap
+			-- below never fires for them: SecureHandler_Other_Execute needs a frame
+			-- handle for the row and GetFrameHandle(row, true) only yields one for
+			-- explicitly protected frames, so its owner:Hide() postBody is skipped.
+			-- Close the menu (and run the action) from the insecure handler instead.
+			-- Both are legal out of combat, the only time these actions apply.
+			local run = def.run
+			row:SetScript("OnClick", function()
+				local unit = menu:GetAttribute("unit")
+				local name = unit and UnitName(unit)
+				if run and name then run(name) end
+				menu:Hide()
+			end)
 		end
 		local fs = StyleRow(row)
 		row:SetText(def.text)
