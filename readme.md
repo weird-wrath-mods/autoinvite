@@ -10,11 +10,12 @@ Auto invite on whisper keyword, raid kick buttons, auto-promote assistants.
 * `/ai party|raid` — Party (5-man only) or Raid (auto-converts party to raid on the 6th invite).
 * `/ai <anything else>` — sets the trigger keyword. Case-insensitive.
 
-### Raid Kick Buttons
-* Two buttons added to the Raid tab of the social ('o') panel:
-* * **Kick All** — prompts before kicking everyone in your party/raid.
-* * **Kick Offline** — kicks anyone currently disconnected.
-* Both buttons enable only while you're in a group.
+### Kick All
+* **Kick All** on the Raid tab of the social ('o') panel prompts before kicking everyone in your party/raid. Enabled only while you're in a group.
+
+### Save / Restore Groups
+* **Save Groups** snapshots the raid's subgroup arrangement (persists across reloads).
+* **Restore Groups** moves members back. Newcomers take a departed member's slot by class; others fill free spots. Needs leader or assist.
 
 ### AutoPromote
 * Right-click any raid member in the 'o' menu and pick **AutoPromote** to toggle the watch list.

@@ -3,6 +3,7 @@
 ## Notes: Auto invite on whisper keyword, raid kick buttons, auto-promote assistants.
 ## Author: Weird Vibes
 ## Version: 0.8-wotlk
-## SavedVariables: AutoInviteOptions, AutoPromoteDB
+## SavedVariables: AutoInviteOptions, AutoPromoteDB, AutoInviteLayoutDB
 AutoInvite.lua
 RaidMenu.lua
+GroupLayout.lua

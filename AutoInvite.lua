@@ -196,7 +196,7 @@ StaticPopupDialogs["AUTOINV_KICK_ALL"] = {
 	end,
 }
 
-local kickAll, kickOfflines
+local kickAll
 
 local function CreateKickButtons()
 	if kickAll or not RaidFrame then return end
@@ -206,33 +206,11 @@ local function CreateKickButtons()
 	kickAll:SetText("Kick All")
 	kickAll:SetScript("OnClick", function() StaticPopup_Show("AUTOINV_KICK_ALL") end)
 
-	kickOfflines = CreateFrame("Button", "AutoInviteKickOfflineBtn", RaidFrame, "UIPanelButtonTemplate")
-	kickOfflines:SetPoint("LEFT", kickAll, "RIGHT", 0, 0)
-	kickOfflines:SetWidth(90); kickOfflines:SetHeight(20)
-	kickOfflines:SetText("Kick Offline")
-	kickOfflines:SetScript("OnClick", function()
-		local rnum = GetNumRaidMembers()
-		if rnum > 0 then
-			for i = 1, rnum do
-				local name, _, _, _, _, _, _, online = GetRaidRosterInfo(i)
-				if name and not online and name ~= UnitName("player") then UninviteUnit(name) end
-			end
-		else
-			local pnum = GetNumPartyMembers()
-			for i = 1, pnum do
-				local unit = "party"..i
-				if not UnitIsConnected(unit) then
-					local name = UnitName(unit)
-					if name then UninviteUnit(name) end
-				end
-			end
-		end
-	end)
+	AutoInvite_CreateLayoutButtons(kickAll)
 
 	local function refresh()
 		local has = (GetNumPartyMembers() + GetNumRaidMembers()) > 0
-		if has then kickAll:Enable(); kickOfflines:Enable()
-		else kickAll:Disable(); kickOfflines:Disable() end
+		if has then kickAll:Enable() else kickAll:Disable() end
 	end
 	refresh()
 	if RaidFrame_Update then hooksecurefunc("RaidFrame_Update", refresh) end
