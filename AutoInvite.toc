@@ -6,4 +6,5 @@
 ## SavedVariables: AutoInviteOptions, AutoPromoteDB, AutoInviteLayoutDB
 AutoInvite.lua
 RaidMenu.lua
+CTRASync.lua
 GroupLayout.lua
