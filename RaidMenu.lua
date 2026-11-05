@@ -126,19 +126,17 @@ local function BuildMenu()
 			row:SetAttribute("useparent-unit", true)
 			if def.action then row:SetAttribute("action", def.action) end
 		else
-			row = CreateFrame("Button", "AIRaidMenuRow"..i, menu)
-			-- Plain rows are not explicitly protected, so the secure OnClick wrap
-			-- below never fires for them: SecureHandler_Other_Execute needs a frame
-			-- handle for the row and GetFrameHandle(row, true) only yields one for
-			-- explicitly protected frames, so its owner:Hide() postBody is skipped.
-			-- Close the menu (and run the action) from the insecure handler instead.
-			-- Both are legal out of combat, the only time these actions apply.
+			-- Plain rows must still be explicitly protected: SecureHandler_Other_Execute
+			-- skips the wrap's owner:Hide() unless GetFrameHandle(row, true) yields a
+			-- handle, and an insecure menu:Hide() is blocked in combat, which left the
+			-- menu stuck open. The action itself is insecure and runs here; the wrapper
+			-- securecalls it, so it cannot taint the secure Hide.
+			row = CreateFrame("Button", "AIRaidMenuRow"..i, menu, "SecureFrameTemplate")
 			local run = def.run
 			row:SetScript("OnClick", function()
 				local unit = menu:GetAttribute("unit")
 				local name = unit and UnitName(unit)
 				if run and name then run(name) end
-				menu:Hide()
 			end)
 		end
 		local fs = StyleRow(row)
